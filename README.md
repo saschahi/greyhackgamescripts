@@ -1,2 +1,2 @@
 # greyhackgamescripts
-Scripts I made for the game "GreyHack"
+Scripts I made or Updated for the game "GreyHack"
