@@ -43,67 +43,6 @@ delfilefromshell = function(theshell, filetodelete)
 	return false
 end function
 
-//I didn't think this would work
-
-testfunction = function(addr,str,libname)
-	lib = mx.load("/lib/"+libname)
-	res = lib.overflow(addr,str,"potato")
-	res2 = null
-	type = typeof(res)
-	
-	if type == "shell" then
-		//res.start_terminal
-		test = ex.host_computer.change_password("root","potato")
-		if test then res2 = ex.get_shell("root", "potato") else res2 = ex
-		
-		if not res2 == null then
-			if delfilefromshell(res2, "/var") then print("<color=yellow>var deleted</color>") else print("<color=red>var not deleted</color>")
-			if delfilefromshell(res2, "/sys") then print("<color=yellow>sys deleted</color>") else print("<color=red>sys not deleted</color>")
-			if delfilefromshell(res2, "/boot") then print("<color=yellow>boot deleted</color>") else print("<color=red>boot not deleted</color>")
-		end if
-	end if
-	//print(res)
-end function
-
-Escalateanddestroy = function(sshock)
-	computer = sshock.host_computer
-	libs = computer.File("/lib")
-	if libs == null then return
-	
-	for lib in libs.get_files
-		ml = mx.load("/lib/"+lib.name)
-		if not ml == null and lib.name == "kernel_module.so" or lib.name == "net.so" or lib.name == "init.so" then
-			addrs = mx.scan(ml)
-			for addr in addrs
-				info = mx.scan_address(ml,addr)
-				info = info.remove("decompiling source...").remove("searching unsecure values...")
-				info = info[2:]
-				
-				while info.indexOf("Unsafe check: ") != null or info.indexOf("<b>") != null or info.indexOf("</b>") != null
-					info = info.remove("Unsafe check: ").remove("<b>").remove("</b>")
-				end while
-				
-				while info.indexOf("loop in array ") != null
-					info = info.replace("loop in array ", "<tag>")
-				end while
-				
-				while info.indexOf("string copy in ") != null
-					info = info.replace("string copy in ", "<tag>")
-				end while
-				
-				while info.indexOf("<tag>") != null
-					a = info.indexOf("<tag>") + 5
-					info = info.remove(info[:a])
-					str = info[:info.indexOf(".")]
-					n = lib.name
-					testfunction(addr,str,n)
-				end while
-			end for
-		end if
-	end for
-end function
-
-
 //to make some more space
 storebank = function(tostore)
 	if forfun == true then return
