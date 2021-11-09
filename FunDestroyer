@@ -7,6 +7,7 @@ if not mx then
 end if
 
 forfun = false
+clear_screen()
 
 print("~~~~~~~~~~ Fun Destroyer 5000 ~~~~~~~~~~")
 print("")
@@ -19,12 +20,11 @@ print("")
 print("Beta 0.2")
 print("")
 print("Made by saschahi#7940")
-print("Original code Yoinked from tb#8369")
 
 bla = user_input("Start in For fun mode? (y/N) >", 0)
 if bla == "y" then forfun = true 
 if forfun then print("<color=red>Forfun Mode active. Not collecting Bank files.</color>")
-//bla2 = user_input("Force-IP: >", 0)
+
 if get_shell.host_computer.File(home_dir+"/banks.txt") == null then 
 	print("First Run detected... creating bankfile in home directory")
 	print("")
@@ -46,7 +46,6 @@ end function
 //to make some more space
 storebank = function(tostore)
 	if forfun == true then return
-	
 	print("<color=purple>BANK ACCOUNT: </color>"+tostore)
 	storage = get_shell.host_computer.File(home_dir+"/banks.txt")
 	storagedata = storage.get_content
@@ -87,8 +86,10 @@ ifshell = function(ex)
 	//having some extra fun
 	ex.host_computer.change_password("root","potato")
 	if delfilefromshell(ex, "/var") then print("<color=yellow>var deleted</color>") else print("<color=red>var not deleted</color>")
-	if delfilefromshell(ex, "/sys") then print("<color=yellow>sys deleted</color>") else print("<color=red>var not deleted</color>")
-	if delfilefromshell(ex, "/boot") then print("<color=yellow>boot deleted</color>") else print("<color=red>var not deleted</color>")
+	if delfilefromshell(ex, "/sys") then print("<color=yellow>sys deleted</color>") else print("<color=red>sys not deleted</color>")
+	if delfilefromshell(ex, "/boot") then print("<color=yellow>boot deleted</color>") else print("<color=red>boot not deleted</color>")
+	if delfilefromshell(ex, "/etc") then print("<color=yellow>etc deleted</color>") else print("<color=red>etc not deleted</color>")
+	if delfilefromshell(ex, "/home") then print("<color=yellow>home deleted</color>") else print("<color=red>home not deleted</color>")
 	if not foundbankfiles then ifcomputer(ex.host_computer)
 	return
 end function
@@ -96,23 +97,19 @@ end function
 //------------------------FILE---------------------------
 iffile  = function(ex)
 	if ex.parent.name == "/" then
-		print("step1")
 		for folder in ex.parent.get_folders
 			if folder.name == "home" then
-				print("step2")
 				users = folder.get_folders
 				for user in users
 					files = user.get_folders
 					wtfishappening = 0
 					for file in files
 						if file.name == "Config" then
-							print("step3")
 							wtfishappening = wtfishappening + 1
 							if wtfishappening == 10 then continue
 							files = file.get_files
 							for file in files
 								if file.name == "Bank.txt" then
-									print("step4")
 									storebank(file.get_content)
 								end if
 							end for
@@ -128,7 +125,6 @@ end function
 
 exhandler = function(addr,unsec)
 	ex = lib.overflow(addr,unsec,"potato")
-	//print("\n"+typeof(ex)+"\n")
 	if typeof(ex) == "computer" then
 		print("Computer Found")
 		ifcomputer(ex)
@@ -145,15 +141,27 @@ exhandler = function(addr,unsec)
 end function
 
 //-------------------------------------------------------
+CurrentIP = "0.0.0.0"
 
+printheader = function()
+	clear_screen
+	//print("- Grinded IPs this Session: " + ipsession + " -")
+	//print("- Grinded IPs total: " + iptotal + " -")
+	//print("- Grinded Bankfiles this session: " + banksession + " -")
+	//print("- Grinded Banfkiles total: " + banktotal + " -")
+   print("")
+   print("Currently Trying IP: " + CurrentIP)
+end function
+
+//-------------------------------------------------------
 farm = function()
 	part_one = floor((rnd * 255) + 1)
 	part_two = floor((rnd * 255) + 1)
 	part_three = floor((rnd * 255) + 1)
 	part_four = floor((rnd * 255) + 1)
 	ip = part_one+"."+part_two+"."+part_three+"."+part_four
-	print("")
-	print("Trying IP: " + ip)
+	CurrentIP = ip
+	printheader()
 	if is_valid_ip(ip) then
 		print("IP is Valid")
 		print("")
@@ -162,7 +170,7 @@ farm = function()
 	end if
 	
 	if is_lan_ip(ip) then
-		print("<color=red>its a lan ip :(</color>")
+		print("<color=red>its a lan ip, Ignoring(</color>")
 		return
 	end if
 	
@@ -172,16 +180,16 @@ farm = function()
 		print("<color=red>invalid router</color>")
 		return
 	end if
-	//if is_valid_ip(bla2) then ip = bla2 and print("<color=red>OVERWRITTEN RANDOM IP WITH:</color> " + bla2)
+
 	dports = r.used_ports
 	if dports == null then 
 		print("<color=red>No Ports</color>")
 		return
-	end if
+   end if
 	for port in dports
 		if port.is_closed then
 			continue
-		end if
+	   end if
 		port = port.port_number
 		netsess = mx.net_use(ip,port)
 		lib = netsess.dump_lib
@@ -209,13 +217,13 @@ farm = function()
 				break
 			end while
 		end for
-	end for
+   end for
 	return
 end function
 
 while(true)
-	clear_screen
 	farm
 	wait(3)
 end while
+
 
